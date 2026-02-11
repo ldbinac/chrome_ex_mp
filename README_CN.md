@@ -1,5 +1,7 @@
 # Multi-Domain Password Manager - Project Summary
 
+[View English Version](./README.md)
+
 ## 项目概述
 
 Multi-Domain Password Manager 是一款专为解决企业内部多二级域名系统密码管理冲突问题而设计的 Chrome 浏览器扩展。
@@ -26,11 +28,18 @@ Multi-Domain Password Manager 是一款专为解决企业内部多二级域名�
 - **Chrome Storage API** - 数据持久化
 - **Manifest V3** - 扩展规范
 
+### 相关文档
+- [Chrome 扩展开发指南](https://developer.chrome.com/docs/extensions/)（英文）
+- [Chrome 扩展中文文档](https://developer.chrome.com/docs/extensions/reference/)（英文，可使用浏览器翻译）
+
 ### 安全特性
 - **AES-256-GCM** - 加密算法
 - **PBKDF2** - 密钥派生（100,000 次迭代）
 - **零知识架构** - 无法访问明文密码
 - **随机 IV** - 每次加密使用唯一初始化向量
+
+### Web Crypto API 文档
+- [MDN Web Docs - Web Crypto API](https://developer.mozilla.org/zh-CN/docs/Web/API/Web_Crypto_API)（中文）
 
 ## 项目结构
 
@@ -64,6 +73,9 @@ chrome_ex_mp/
 │   └── icons/                 # 图标资源
 └── dist/                      # 构建输出
 ```
+
+### 存储 API 文档
+- [Chrome Storage API 文档](https://developer.chrome.com/docs/extensions/reference/storage/)（英文，可使用浏览器翻译）
 
 ## 核心功能
 
@@ -299,6 +311,8 @@ chrome_ex_mp/
 ## 许可证
 
 MIT License - 详见 LICENSE 文件
+
+关于 MIT 许可证的更多信息，请访问 [MIT License 文档](https://opensource.org/licenses/MIT)（英文，可使用浏览器翻译）。
 
 ## 联系方式
 

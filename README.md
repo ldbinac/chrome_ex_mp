@@ -1,5 +1,7 @@
 # Multi-Domain Password Manager - Chrome Extension
 
+[查看中文版本](./README_CN.md)
+
 A Chrome browser extension designed to solve password management conflicts across multiple subdomains in enterprise testing environments.
 
 ## Problem Statement
@@ -57,6 +59,9 @@ npm run build
    - Enable "Developer mode"
    - Click "Load unpacked"
    - Select the `dist` folder
+
+### Chrome Extension Documentation
+For more information on Chrome extension development, visit the [Chrome Extensions Developer Guide](https://developer.chrome.com/docs/extensions/).
 
 ### Production Build
 
@@ -140,6 +145,8 @@ Manages data persistence using Chrome Storage API:
 - Cross-device sync via chrome.storage.sync
 - Import/export functionality
 
+For more information on the Chrome Storage API, visit the [Chrome Storage API Documentation](https://developer.chrome.com/docs/extensions/reference/storage/).
+
 #### DomainService
 Provides domain parsing and normalization:
 - Extracts full domain including subdomain
@@ -169,6 +176,9 @@ Injects into web pages to:
 - Master password is never stored, only its hash
 - Encryption keys are derived using PBKDF2
 
+### Web Crypto API
+For more information on the Web Crypto API used for encryption, visit the [MDN Web Docs - Web Crypto API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Crypto_API).
+
 ### Data Storage
 - Encrypted data stored locally in chrome.storage.local
 - No plaintext passwords ever stored
@@ -191,6 +201,9 @@ npm run build    # Production build
 npm run test     # Run tests
 npm run lint     # Run ESLint
 ```
+
+### TypeScript Documentation
+For more information on TypeScript, visit the [TypeScript Documentation](https://www.typescriptlang.org/docs/).
 
 ### Adding New Features
 
@@ -226,6 +239,8 @@ npm run lint     # Run ESLint
 ## License
 
 MIT License - See LICENSE file for details
+
+For more information about the MIT License, visit the [MIT License Documentation](https://opensource.org/licenses/MIT).
 
 ## Contributing
 
