@@ -8,6 +8,18 @@ let isPageValid = true;
 
 function detectPasswordFields(): void {
   passwordFields = Array.from(document.querySelectorAll('input[type="password"]')) as HTMLInputElement[];
+  // 如果passwordFields为空，则从所有的input元素中筛选出password字段
+  if (passwordFields.length === 0) {
+    passwordFields = Array.from(document.querySelectorAll('input[type="text"], input[type="email"]'))
+      .filter((input): input is HTMLInputElement => {
+        const elem = input as HTMLInputElement;
+        const name = elem.name.toLowerCase();
+        const id = elem.id.toLowerCase();
+        const placeholder = (elem.placeholder || '').toLowerCase();
+        return name.includes('password') || id.includes('password') || placeholder.includes('password') || placeholder.includes('密码');
+      });
+  } 
+
   usernameFields = Array.from(document.querySelectorAll('input[type="text"], input[type="email"]'))
     .filter((input): input is HTMLInputElement => {
       const elem = input as HTMLInputElement;
@@ -17,7 +29,7 @@ function detectPasswordFields(): void {
       return name.includes('user') || name.includes('email') || name.includes('login') ||
              id.includes('user') || id.includes('email') || id.includes('login') ||
              placeholder.includes('user') || placeholder.includes('email') || placeholder.includes('login') || 
-             placeholder.includes('用户名') || placeholder.includes('账号');
+             placeholder.includes('用户名') || placeholder.includes('用户') || placeholder.includes('账号');
     });
 
   if (passwordFields.length > 0 && isPageValid) {
