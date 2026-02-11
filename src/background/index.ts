@@ -6,7 +6,7 @@ import { CryptoService } from '../services/CryptoService';
 let masterPassword: string | null = 'admin';
 
 chrome.runtime.onInstalled.addListener(async () => {
-  console.log('Multi-Domain Password Manager installed');
+  console.log('多级域名密码管理器(Multi-Domain Password Manager) installed');
   
   await chrome.contextMenus.create({
     id: 'fill-password',

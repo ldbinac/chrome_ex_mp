@@ -315,7 +315,7 @@ function App() {
         <Toolbar>
           <Key sx={{ mr: 2 }} />
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Multi-Domain Password Manager
+            多级域名密码管理器(Multi-Domain Password Manager)
           </Typography>
         </Toolbar>
       </AppBar>

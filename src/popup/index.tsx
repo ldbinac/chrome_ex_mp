@@ -330,6 +330,7 @@ function App() {
           </Box>
         ) : state.passwords.length === 0 ? (
           <Alert severity="info">
+            暂无此域名的密码记录。请登录该网站以保存密码。
             No passwords saved for this domain. Log in to a site to save your password.
           </Alert>
         ) : (

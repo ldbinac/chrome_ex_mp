@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Multi-Domain Password Manager",
+  "name": "多级域名密码管理器(Multi-Domain Password Manager)",
   "version": "1.0.0",
-  "description": "A Chrome extension to manage passwords across multiple subdomains",
+  "description": "A Chrome extension to manage passwords across multiple subdomains /n 多级域名密码管理器(Multi-Domain Password Manager)是一款专为解决企业内部多二级域名系统密码管理冲突问题而设计的 Chrome 浏览器扩展。",
   "permissions": [
     "storage",
     "tabs",

@@ -2,7 +2,7 @@
 
 ## 项目概述
 
-Multi-Domain Password Manager 是一款专为解决企业内部多二级域名测试系统密码管理冲突问题而设计的 Chrome 浏览器扩展。
+Multi-Domain Password Manager 是一款专为解决企业内部多二级域名系统密码管理冲突问题而设计的 Chrome 浏览器扩展。
 
 ### 核心问题
 

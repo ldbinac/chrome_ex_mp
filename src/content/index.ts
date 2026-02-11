@@ -200,6 +200,7 @@ function showSavePrompt(username: string, password: string): void {
         },
       });
       prompt.remove();
+      showSaveSuccessNotification();
     } catch (error) {
       console.error('Failed to save password:', error);
       prompt.remove();
@@ -244,6 +245,66 @@ function showSavePrompt(username: string, password: string): void {
       prompt.remove();
     }
   }, 30000);
+}
+
+function showSaveSuccessNotification(): void {
+  if (!isPageValid) return;
+
+  const existingNotification = document.getElementById('save-success-notification');
+  if (existingNotification !== null) {
+    existingNotification.remove();
+  }
+
+  const notification = document.createElement('div');
+  notification.id = 'save-success-notification';
+  notification.style.cssText = `
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2147483647;
+    background: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    padding: 16px 24px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: slideDown 0.3s ease-out;
+  `;
+
+  const icon = document.createElement('div');
+  icon.textContent = '✓';
+  icon.style.cssText = `
+    font-size: 20px;
+    font-weight: bold;
+  `;
+  notification.appendChild(icon);
+
+  const message = document.createElement('div');
+  message.textContent = '密码保存成功！';
+  message.style.cssText = `
+    font-size: 14px;
+    font-weight: 500;
+  `;
+  notification.appendChild(message);
+
+  document.body.appendChild(notification);
+
+  setTimeout(() => {
+    if (isPageValid && document.body.contains(notification)) {
+      notification.style.opacity = '0';
+      notification.style.transition = 'opacity 0.3s ease-out';
+      setTimeout(() => {
+        if (document.body.contains(notification)) {
+          notification.remove();
+        }
+      }, 300);
+    }
+  }, 3000);
 }
 
 function showNoPasswordHint(payload: any): void {
