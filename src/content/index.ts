@@ -65,15 +65,17 @@ function showPasswordSelector(passwords: PasswordEntry[]): void {
   container.id = 'password-selector-container';
   container.style.cssText = `
     position: fixed;
-    top: 20px;
-    right: 20px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     z-index: 2147483647;
     background: white;
     border: 1px solid #ccc;
     border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-    padding: 16px;
-    max-width: 380px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    padding: 20px;
+    max-width: 360px;
+    width: 80%;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   `;
 
@@ -146,15 +148,15 @@ function showSavePrompt(username: string, password: string): void {
   prompt.id = 'save-password-prompt';
   prompt.style.cssText = `
     position: fixed;
-    bottom: 20px;
-    right: 20px;
+    bottom: 30%;
+    left: 50%;
     z-index: 2147483647;
     background: white;
     border: 1px solid #ccc;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.2);
     padding: 16px;
-    max-width: 350px;
+    max-width: 360px;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   `;
 
