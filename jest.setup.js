@@ -1,3 +1,46 @@
+// TextEncoder polyfill
+if (typeof TextEncoder === 'undefined') {
+  const { TextEncoder, TextDecoder } = require('util');
+  global.TextEncoder = TextEncoder;
+  global.TextDecoder = TextDecoder;
+}
+
+// Crypto API polyfill
+if (typeof crypto === 'undefined') {
+  global.crypto = {
+    getRandomValues: function(array) {
+      for (let i = 0; i < array.length; i++) {
+        array[i] = Math.floor(Math.random() * 256);
+      }
+      return array;
+    },
+    randomUUID: function() {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    },
+    subtle: {
+      importKey: async function(format, keyData, algorithm, extractable, keyUsages) {
+        return { format, keyData, algorithm, extractable, keyUsages };
+      },
+      deriveKey: async function(algorithm, baseKey, derivedKeyAlgorithm, extractable, keyUsages) {
+        return { algorithm, baseKey, derivedKeyAlgorithm, extractable, keyUsages };
+      },
+      encrypt: async function(algorithm, key, data) {
+        return Buffer.from('encrypted-data');
+      },
+      decrypt: async function(algorithm, key, data) {
+        return Buffer.from('decrypted-data');
+      },
+      digest: async function(algorithm, data) {
+        return Buffer.from('digest-data');
+      }
+    }
+  };
+}
+
 global.chrome = {
   runtime: {
     sendMessage: jest.fn(),

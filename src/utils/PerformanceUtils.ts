@@ -67,7 +67,7 @@ export class PerformanceMonitor {
 }
 
 export class Debounce {
-  private timer: number | null = null;
+  private timer: NodeJS.Timeout | null = null;
 
   constructor(private delay: number) {}
 
@@ -91,7 +91,7 @@ export class Debounce {
 
 export class Throttle {
   private lastExecution = 0;
-  private timer: number | null = null;
+  private timer: NodeJS.Timeout | null = null;
 
   constructor(private delay: number) {}
 
@@ -177,7 +177,7 @@ export class Cache<T> {
 
 export class BatchProcessor<T> {
   private queue: T[] = [];
-  private timer: number | null = null;
+  private timer: NodeJS.Timeout | null = null;
 
   constructor(
     private batchSize: number,

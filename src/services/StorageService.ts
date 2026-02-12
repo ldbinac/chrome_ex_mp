@@ -156,20 +156,62 @@ export class StorageService {
   static async exportData(masterPassword: string): Promise<string> {
     const passwords = await this.getPasswords(masterPassword);
     const settings = await this.getSettings();
+    const exportedAt = Date.now();
+    
+    // 加密密码字段
+    const encryptedPasswords = await Promise.all(passwords.map(async (entry) => {
+      try {
+        const key = await CryptoService.generateCBCKey(settings.masterPasswordHash);
+        const iv = CryptoService.generateCBCIV(exportedAt);
+        const encryptedPassword = await CryptoService.encryptWithCBC(entry.password, key, iv);
+        return {
+          ...entry,
+          password: encryptedPassword,
+          __encrypted: true
+        };
+      } catch (error) {
+        console.error('Failed to encrypt password:', error);
+        return entry;
+      }
+    }));
+    
     const data = {
-      passwords,
+      passwords: encryptedPasswords,
       settings,
-      exportedAt: Date.now(),
+      exportedAt,
+      version: '1.0'
     };
+    console.log('exportData - Exporting data:', data);
     return JSON.stringify(data);
   }
 
   static async importData(data: string, masterPassword: string): Promise<void> {
     const parsed = JSON.parse(data);
     // console.log('importData - Importing data:', parsed);
+    
     if (parsed.passwords) {
-      await this.savePasswords(parsed.passwords, masterPassword);
+      // 解密密码字段
+      const decryptedPasswords = await Promise.all(parsed.passwords.map(async (entry: any) => {
+        try {
+          if (entry.__encrypted && parsed.exportedAt && parsed.settings?.masterPasswordHash) {
+            const key = await CryptoService.generateCBCKey(parsed.settings.masterPasswordHash);
+            const iv = CryptoService.generateCBCIV(parsed.exportedAt);
+            const decryptedPassword = await CryptoService.decryptWithCBC(entry.password, key, iv);
+            const { __encrypted, ...decryptedEntry } = entry;
+            return {
+              ...decryptedEntry,
+              password: decryptedPassword
+            };
+          }
+          return entry;
+        } catch (error) {
+          console.error('Failed to decrypt password:', error);
+          throw new Error('Failed to decrypt imported passwords. Please check your master password.');
+        }
+      }));
+      await this.savePasswords(decryptedPasswords, masterPassword);
     }
+    
     if (parsed.settings) {
       await this.saveSettings(parsed.settings);
     }

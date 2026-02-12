@@ -2,8 +2,10 @@ import { EncryptedData } from '../types';
 
 export class CryptoService {
   private static readonly ALGORITHM = 'AES-GCM';
+  private static readonly CBC_ALGORITHM = 'AES-CBC';
   private static readonly KEY_LENGTH = 256;
   private static readonly IV_LENGTH = 12;
+  private static readonly CBC_IV_LENGTH = 16;
   private static readonly SALT_LENGTH = 16;
   private static readonly PBKDF2_ITERATIONS = 100000;
 
@@ -43,7 +45,7 @@ export class CryptoService {
     const dataBuffer = encoder.encode(data);
 
     const encryptedBuffer = await crypto.subtle.encrypt(
-      { name: this.ALGORITHM, iv },
+      { name: this.ALGORITHM, iv: iv as BufferSource },
       key,
       dataBuffer
     );
@@ -61,13 +63,65 @@ export class CryptoService {
     const encryptedBuffer = this.base64ToArrayBuffer(encryptedData.data);
 
     const decryptedBuffer = await crypto.subtle.decrypt(
-      { name: this.ALGORITHM, iv },
+      { name: this.ALGORITHM, iv: iv as BufferSource },
       key,
       encryptedBuffer
     );
 
     const decoder = new TextDecoder();
     return decoder.decode(decryptedBuffer);
+  }
+
+  static async encryptWithCBC(data: string, key: CryptoKey, iv: Uint8Array): Promise<string> {
+    const encoder = new TextEncoder();
+    const dataBuffer = encoder.encode(data);
+
+    const encryptedBuffer = await crypto.subtle.encrypt(
+      { name: this.CBC_ALGORITHM, iv: iv as BufferSource },
+      key,
+      dataBuffer
+    );
+
+    return this.arrayBufferToBase64(encryptedBuffer);
+  }
+
+  static async decryptWithCBC(encryptedData: string, key: CryptoKey, iv: Uint8Array): Promise<string> {
+    const encryptedBuffer = this.base64ToArrayBuffer(encryptedData);
+
+    const decryptedBuffer = await crypto.subtle.decrypt(
+      { name: this.CBC_ALGORITHM, iv: iv as BufferSource },
+      key,
+      encryptedBuffer
+    );
+
+    const decoder = new TextDecoder();
+    return decoder.decode(decryptedBuffer);
+  }
+
+  static async generateCBCKey(masterPasswordHash: string): Promise<CryptoKey> {
+    const encoder = new TextEncoder();
+    const keyMaterial = encoder.encode(masterPasswordHash);
+    
+    // 使用 SHA-256 哈希确保密钥材料长度为 32 字节（256 位）
+    const keyHash = await crypto.subtle.digest('SHA-256', keyMaterial);
+
+    return crypto.subtle.importKey(
+      'raw',
+      keyHash,
+      { name: this.CBC_ALGORITHM, length: this.KEY_LENGTH },
+      false,
+      ['encrypt', 'decrypt']
+    );
+  }
+
+  static generateCBCIV(timestamp: number): Uint8Array {
+    const iv = new Uint8Array(this.CBC_IV_LENGTH);
+    const timestampBytes = new Uint8Array(8);
+    for (let i = 0; i < 8; i++) {
+      timestampBytes[i] = (timestamp >> (i * 8)) & 0xff;
+    }
+    iv.set(timestampBytes, 0);
+    return iv;
   }
 
   static async hashPassword(password: string): Promise<string> {
@@ -96,6 +150,6 @@ export class CryptoService {
     for (let i = 0; i < binary.length; i++) {
       bytes[i] = binary.charCodeAt(i);
     }
-    return bytes.buffer;
+    return bytes.buffer as ArrayBuffer;
   }
 }
