@@ -370,10 +370,10 @@ function showNoPasswordHint(payload: any): void {
   `;
   steps.innerHTML = `
     <div style="margin-bottom: 8px;">📝 <strong>步骤 1：</strong> 在登录表单中输入用户名和密码</div>
-    <div style="margin-bottom: 8px;">💾 <strong>步骤 2：</strong> 点击登录按钮</div>
-    <div style="margin-bottom: 8px;">🖱️ <strong>步骤 3：</strong> 登录成功后，扩展会提示保存密码</div>
-    <div style="margin-bottom: 8px;">✅ <strong>步骤 4：</strong> 点击"保存"按钮</div>
-    <div>🔄 <strong>步骤 5：</strong> 下次访问时，右键点击密码输入框即可填充</div>
+    <div style="margin-bottom: 8px;">🖱️ <strong>步骤 2：</strong> 在页面点击右键，选择“save password”</div>
+    <div style="margin-bottom: 8px;">💾  <strong>步骤 3：</strong> 点击save"保存"按钮</div>
+    <div style="margin-bottom: 8px;">✅<strong>步骤 4：</strong> 保存成功后，扩展会提示保存成功</div>
+    <div>🔄 <strong>步骤 5：</strong> 再次访问时，右键点击密码输入框，选择“FillPassword”即可</div>
   `;
   hint.appendChild(steps);
 
@@ -407,7 +407,7 @@ function showNoPasswordHint(payload: any): void {
         if (document.body.contains(hint)) {
           hint.remove();
         }
-      }, 300);
+      }, 900);
     }
   }, autoHideDelay);
 }
