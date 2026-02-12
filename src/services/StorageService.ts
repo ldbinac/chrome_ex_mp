@@ -1,5 +1,6 @@
 import { PasswordEntry, ExtensionSettings, EncryptedData } from '../types';
 import { CryptoService } from './CryptoService';
+import { DomainService } from './DomainService';
 
 export class StorageService {
   private static readonly PASSWORDS_KEY = 'passwords';
@@ -52,12 +53,56 @@ export class StorageService {
 
   static async getPasswordByDomain(domain: string, masterPassword: string): Promise<PasswordEntry[]> {
     const passwords = await this.getPasswords(masterPassword);
-    return passwords.filter(p => p.domain === domain);
+    const normalizedDomain = DomainService.normalizeDomain(domain);
+    const baseDomain = DomainService.getBaseDomain(normalizedDomain);
+    
+    console.log('getPasswordByDomain - Input domain:', domain);
+    console.log('getPasswordByDomain - Normalized domain:', normalizedDomain);
+    console.log('getPasswordByDomain - Base domain:', baseDomain);
+    
+    return passwords.filter(p => {
+      const normalizedPasswordDomain = DomainService.normalizeDomain(p.domain);
+      const passwordBaseDomain = DomainService.getBaseDomain(normalizedPasswordDomain);
+      
+      // 严格匹配或基础域名匹配
+      const isExactMatch = normalizedPasswordDomain === normalizedDomain;
+      const isBaseDomainMatch = passwordBaseDomain === baseDomain;
+      
+      console.log('getPasswordByDomain - Checking password domain:', p.domain);
+      console.log('getPasswordByDomain - Normalized password domain:', normalizedPasswordDomain);
+      console.log('getPasswordByDomain - Password base domain:', passwordBaseDomain);
+      console.log('getPasswordByDomain - Exact match:', isExactMatch);
+      console.log('getPasswordByDomain - Base domain match:', isBaseDomainMatch);
+      
+      return isExactMatch && isBaseDomainMatch;
+    });
   }
 
   static async getPasswordByDomainAndUsername(domain: string, username: string, masterPassword: string): Promise<PasswordEntry | undefined> {
     const passwords = await this.getPasswords(masterPassword);
-    return passwords.find(p => p.domain === domain && p.username === username);
+    const normalizedDomain = DomainService.normalizeDomain(domain);
+    const baseDomain = DomainService.getBaseDomain(normalizedDomain);
+    
+    console.log('getPasswordByDomainAndUsername - Input domain:', domain);
+    console.log('getPasswordByDomainAndUsername - Normalized domain:', normalizedDomain);
+    console.log('getPasswordByDomainAndUsername - Base domain:', baseDomain);
+    console.log('getPasswordByDomainAndUsername - Username:', username);
+    
+    return passwords.find(p => {
+      const normalizedPasswordDomain = DomainService.normalizeDomain(p.domain);
+      const passwordBaseDomain = DomainService.getBaseDomain(normalizedPasswordDomain);
+      
+      // 严格匹配或基础域名匹配，并且用户名匹配
+      const isDomainMatch = normalizedPasswordDomain === normalizedDomain || passwordBaseDomain === baseDomain;
+      const isUsernameMatch = p.username === username;
+      
+      console.log('getPasswordByDomainAndUsername - Checking password domain:', p.domain);
+      console.log('getPasswordByDomainAndUsername - Checking password username:', p.username);
+      console.log('getPasswordByDomainAndUsername - Domain match:', isDomainMatch);
+      console.log('getPasswordByDomainAndUsername - Username match:', isUsernameMatch);
+      
+      return isDomainMatch && isUsernameMatch;
+    });
   }
 
   static async getSettings(): Promise<ExtensionSettings> {

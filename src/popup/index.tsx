@@ -53,50 +53,63 @@ function App() {
     try {
       const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
       const tab = tabs[0];
+      let currentDomain = '';
       if (tab && tab.url) {
         const currentUrl = tab.url;
-        const currentDomain = DomainService.extractDomain(currentUrl);
+        currentDomain = DomainService.extractDomain(currentUrl);
         setState(prev => ({ ...prev, currentUrl, currentDomain }));
+        console.log('initializeApp - Extracted domain:', currentDomain);
       }
-
+      console.log('initializeApp - 0000:');
       const isSet = await chrome.runtime.sendMessage({ type: 'IS_MASTER_PASSWORD_SET' });
       const isVerified = await chrome.runtime.sendMessage({ type: 'IS_MASTER_PASSWORD_VERIFIED' });
-      
+      console.log('initializeApp - 0000-1:');
       setState(prev => ({
         ...prev,
         masterPasswordSet: isSet,
         masterPasswordVerified: isVerified,
       }));
-
+      console.log('initializeApp - 1111:', isVerified);
       if (isVerified) {
-        await loadPasswords();
+        console.log('initializeApp - Calling loadPasswords with domain:', currentDomain);
+        await loadPasswords(currentDomain);
+        console.log('initializeApp - 2222:', state.currentDomain);
       }
     } catch (error) {
       setState(prev => ({ ...prev, error: 'Failed to initialize app' }));
     }
   };
 
-  const loadPasswords = async () => {
-    if (!state.currentDomain) return;
+  const loadPasswords = async (domain?: string) => {
+    const targetDomain = domain || state.currentDomain;
+    if (!targetDomain) return;
 
+    console.log('loadPasswords - Target domain:', targetDomain);
     setState(prev => ({ ...prev, loading: true, error: null }));
     try {
       const response = await chrome.runtime.sendMessage({
         type: 'GET_PASSWORDS_BY_DOMAIN',
-        payload: { domain: state.currentDomain },
+        payload: { domain: targetDomain },
       });
-      
+
+      console.log('loadPasswords - Response:', response);
+
       if (response && response.error) {
-        setState(prev => ({ 
-          ...prev, 
-          loading: false, 
+        console.log('loadPasswords - Error response:', response.error);
+        setState(prev => ({
+          ...prev,
+          loading: false,
           showErrorDialog: true,
-          errorMessage: response.error 
+          errorMessage: response.error
         }));
       } else {
-        setState(prev => ({ ...prev, passwords: response || [], loading: false }));
+        const passwordsArray = response || [];
+        console.log('loadPasswords - Passwords found:', passwordsArray.length);
+        console.log('loadPasswords - Passwords details:', passwordsArray);
+        setState(prev => ({ ...prev, passwords: passwordsArray, loading: false }));
       }
     } catch (error) {
+      console.error('loadPasswords - Catch error:', error);
       setState(prev => ({ ...prev, loading: false, error: 'Failed to load passwords' }));
     }
   };
@@ -111,13 +124,13 @@ function App() {
         type: 'VERIFY_MASTER_PASSWORD',
         payload: state.masterPassword,
       });
-      
+
       if (response && response.error) {
-        setState(prev => ({ 
-          ...prev, 
-          loading: false, 
+        setState(prev => ({
+          ...prev,
+          loading: false,
           showErrorDialog: true,
-          errorMessage: response.error 
+          errorMessage: response.error
         }));
       } else if (response && response.isValid) {
         setState(prev => ({ ...prev, masterPasswordVerified: true, loading: false }));
@@ -140,13 +153,13 @@ function App() {
         type: 'SET_MASTER_PASSWORD',
         payload: state.masterPassword,
       });
-      
+
       if (response && response.error) {
-        setState(prev => ({ 
-          ...prev, 
-          loading: false, 
+        setState(prev => ({
+          ...prev,
+          loading: false,
           showErrorDialog: true,
-          errorMessage: response.error 
+          errorMessage: response.error
         }));
       } else {
         setState(prev => ({ ...prev, masterPasswordSet: true, masterPasswordVerified: true, loading: false }));
@@ -175,20 +188,20 @@ function App() {
 
   const handleDeletePassword = async (id: string) => {
     if (!confirm('Are you sure you want to delete this password?')) return;
-    
+
     setState(prev => ({ ...prev, loading: true, error: null }));
     try {
       const response = await chrome.runtime.sendMessage({
         type: 'DELETE_PASSWORD',
         payload: id,
       });
-      
+
       if (response && response.error) {
-        setState(prev => ({ 
-          ...prev, 
-          loading: false, 
+        setState(prev => ({
+          ...prev,
+          loading: false,
           showErrorDialog: true,
-          errorMessage: response.error 
+          errorMessage: response.error
         }));
       } else {
         await loadPasswords();
@@ -334,58 +347,63 @@ function App() {
             No passwords saved for this domain. Log in to a site to save your password.
           </Alert>
         ) : (
-          <List>
-            {state.passwords.map((password) => (
-              <React.Fragment key={password.id}>
-                <ListItem
-                  secondaryAction={
-                    <Box sx={{ display: 'flex', gap: 0.5 }}>
-                      <IconButton
-                        size="small"
-                        onClick={() => handleCopyPassword(password.password)}
-                      >
-                        <ContentCopy fontSize="small" />
-                      </IconButton>
-                      <IconButton
-                        size="small"
-                        onClick={() => togglePasswordVisibility(password.id)}
-                      >
-                        {state.showPassword[password.id] ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
-                      </IconButton>
-                      <IconButton
-                        size="small"
-                        onClick={() => handleDeletePassword(password.id)}
-                      >
-                        <Delete fontSize="small" />
-                      </IconButton>
-                    </Box>
-                  }
-                >
-                  <ListItemText
-                    primary={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-                        <Typography variant="subtitle2">{password.username}</Typography>
-                        {password.tags.map((tag) => (
-                          <Chip key={tag} label={tag} size="small" variant="outlined" />
-                        ))}
-                      </Box>
-                    }
-                    secondary={
-                      <Box>
-                        <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
-                          {state.showPassword[password.id] ? password.password : '••••••••'}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          Last used: {new Date(password.lastUsed).toLocaleDateString()}
-                        </Typography>
-                      </Box>
-                    }
-                  />
-                </ListItem>
-                <Divider />
-              </React.Fragment>
-            ))}
-          </List>
+          <>
+            <List>
+
+              {state.passwords.map((password) => {
+                console.log('Rendering password entry:', password.id, 'for domain:', password.domain);
+                return (
+                  <React.Fragment key={password.id}>
+                    <ListItem
+                      secondaryAction={
+                        <Box sx={{ display: 'flex', gap: 0.5 }}>
+                          <IconButton
+                            size="small"
+                            onClick={() => handleCopyPassword(password.password)}
+                          >
+                            <ContentCopy fontSize="small" />
+                          </IconButton>
+                          <IconButton
+                            size="small"
+                            onClick={() => togglePasswordVisibility(password.id)}
+                          >
+                            {state.showPassword[password.id] ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+                          </IconButton>
+                          <IconButton
+                            size="small"
+                            onClick={() => handleDeletePassword(password.id)}
+                          >
+                            <Delete fontSize="small" />
+                          </IconButton>
+                        </Box>
+                      }
+                    >
+                      <ListItemText
+                        primary={
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                            <Typography variant="subtitle2">{password.username}</Typography>
+                            {password.tags.map((tag) => (
+                              <Chip key={tag} label={tag} size="small" variant="outlined" />
+                            ))}
+                          </Box>
+                        }
+                        secondary={
+                          <Box>
+                            <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
+                              {state.showPassword[password.id] ? password.password : '••••••••'}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              Last used: {new Date(password.lastUsed).toLocaleDateString()}
+                            </Typography>
+                          </Box>
+                        }
+                      />
+                    </ListItem>
+                    <Divider />
+                  </React.Fragment>
+                )})}
+            </List>
+          </>
         )}
 
         <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
