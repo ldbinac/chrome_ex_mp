@@ -26,8 +26,10 @@ export class StorageService {
   }
 
   static async savePasswords(passwords: PasswordEntry[], masterPassword: string): Promise<void> {
+    // console.log('savePasswords - Saved passwords:', passwords);
     const encryptedData = await CryptoService.encrypt(JSON.stringify(passwords), masterPassword);
     await chrome.storage.local.set({ [this.PASSWORDS_KEY]: encryptedData });
+    // console.log('savePasswords - Encrypted data:', encryptedData);
   }
 
   static async addPassword(entry: PasswordEntry, masterPassword: string): Promise<void> {
@@ -56,9 +58,9 @@ export class StorageService {
     const normalizedDomain = DomainService.normalizeDomain(domain);
     const baseDomain = DomainService.getBaseDomain(normalizedDomain);
     
-    console.log('getPasswordByDomain - Input domain:', domain);
-    console.log('getPasswordByDomain - Normalized domain:', normalizedDomain);
-    console.log('getPasswordByDomain - Base domain:', baseDomain);
+    // console.log('getPasswordByDomain - Input domain:', domain);
+    // console.log('getPasswordByDomain - Normalized domain:', normalizedDomain);
+    // console.log('getPasswordByDomain - Base domain:', baseDomain);
     
     return passwords.filter(p => {
       const normalizedPasswordDomain = DomainService.normalizeDomain(p.domain);
@@ -68,11 +70,11 @@ export class StorageService {
       const isExactMatch = normalizedPasswordDomain === normalizedDomain;
       const isBaseDomainMatch = passwordBaseDomain === baseDomain;
       
-      console.log('getPasswordByDomain - Checking password domain:', p.domain);
-      console.log('getPasswordByDomain - Normalized password domain:', normalizedPasswordDomain);
-      console.log('getPasswordByDomain - Password base domain:', passwordBaseDomain);
-      console.log('getPasswordByDomain - Exact match:', isExactMatch);
-      console.log('getPasswordByDomain - Base domain match:', isBaseDomainMatch);
+      // console.log('getPasswordByDomain - Checking password domain:', p.domain);
+      // console.log('getPasswordByDomain - Normalized password domain:', normalizedPasswordDomain);
+      // console.log('getPasswordByDomain - Password base domain:', passwordBaseDomain);
+      // console.log('getPasswordByDomain - Exact match:', isExactMatch);
+      // console.log('getPasswordByDomain - Base domain match:', isBaseDomainMatch);
       
       return isExactMatch && isBaseDomainMatch;
     });
@@ -83,10 +85,10 @@ export class StorageService {
     const normalizedDomain = DomainService.normalizeDomain(domain);
     const baseDomain = DomainService.getBaseDomain(normalizedDomain);
     
-    console.log('getPasswordByDomainAndUsername - Input domain:', domain);
-    console.log('getPasswordByDomainAndUsername - Normalized domain:', normalizedDomain);
-    console.log('getPasswordByDomainAndUsername - Base domain:', baseDomain);
-    console.log('getPasswordByDomainAndUsername - Username:', username);
+    // console.log('getPasswordByDomainAndUsername - Input domain:', domain);
+    // console.log('getPasswordByDomainAndUsername - Normalized domain:', normalizedDomain);
+    // console.log('getPasswordByDomainAndUsername - Base domain:', baseDomain);
+    // console.log('getPasswordByDomainAndUsername - Username:', username);
     
     return passwords.find(p => {
       const normalizedPasswordDomain = DomainService.normalizeDomain(p.domain);
@@ -96,10 +98,10 @@ export class StorageService {
       const isDomainMatch = normalizedPasswordDomain === normalizedDomain || passwordBaseDomain === baseDomain;
       const isUsernameMatch = p.username === username;
       
-      console.log('getPasswordByDomainAndUsername - Checking password domain:', p.domain);
-      console.log('getPasswordByDomainAndUsername - Checking password username:', p.username);
-      console.log('getPasswordByDomainAndUsername - Domain match:', isDomainMatch);
-      console.log('getPasswordByDomainAndUsername - Username match:', isUsernameMatch);
+      // console.log('getPasswordByDomainAndUsername - Checking password domain:', p.domain);
+      // console.log('getPasswordByDomainAndUsername - Checking password username:', p.username);
+      // console.log('getPasswordByDomainAndUsername - Domain match:', isDomainMatch);
+      // console.log('getPasswordByDomainAndUsername - Username match:', isUsernameMatch);
       
       return isDomainMatch && isUsernameMatch;
     });
@@ -164,6 +166,7 @@ export class StorageService {
 
   static async importData(data: string, masterPassword: string): Promise<void> {
     const parsed = JSON.parse(data);
+    // console.log('importData - Importing data:', parsed);
     if (parsed.passwords) {
       await this.savePasswords(parsed.passwords, masterPassword);
     }

@@ -270,7 +270,10 @@ function App() {
   const handleExportData = async () => {
     try {
       const data = await chrome.runtime.sendMessage({ type: 'EXPORT_DATA' });
-      setState(prev => ({ ...prev, exportData: JSON.stringify(data, null, 2), showExportDialog: true }));
+      // console.log('handleExportData - Exported data:', data);
+      // setState(prev => ({ ...prev, exportData: JSON.stringify(data, null, 2), showExportDialog: true }));
+      // console.log('handleExportData - Exported data-json2:', JSON.stringify(data, null, 2));
+      setState(prev => ({ ...prev, exportData: data, showExportDialog: true }));
     } catch (error) {
       setState(prev => ({ ...prev, error: 'Failed to export data' }));
     }
@@ -284,6 +287,12 @@ function App() {
       });
       setState(prev => ({ ...prev, showImportDialog: false, importData: '' }));
       await loadPasswords();
+      // 导入成功提示
+      setState(prev => ({ ...prev, error: null }));
+      // 使用临时成功提示，3秒后自动消失
+      const successMsg = '导入成功！数据已更新。';
+      setState(prev => ({ ...prev, error: successMsg }));
+      setTimeout(() => setState(prev => ({ ...prev, error: null })), 3000);
     } catch (error) {
       setState(prev => ({ ...prev, error: 'Failed to import data' }));
     }
@@ -612,6 +621,7 @@ function App() {
               </Button>
             </Box>
             <Alert severity="warning">
+              警告：导入数据将覆盖现有密码。请确保先备份数据。
               Warning: Importing data will overwrite existing passwords. Make sure to backup your data first.
             </Alert>
           </Box>
@@ -811,6 +821,7 @@ function App() {
         <DialogTitle>Export Data</DialogTitle>
         <DialogContent>
           <Alert severity="warning" sx={{ mb: 2 }}>
+            这些数据包含密码等敏感信息。请妥善保管，不要与他人共享。
             This data contains sensitive information. Keep it secure and do not share it with others.
           </Alert>
           <TextField
@@ -849,6 +860,7 @@ function App() {
         <DialogTitle>Import Data</DialogTitle>
         <DialogContent>
           <Alert severity="warning" sx={{ mb: 2 }}>
+            导入将覆盖现有密码。请务必先备份。
             Importing will overwrite existing passwords. Make sure to backup first.
           </Alert>
           <TextField
