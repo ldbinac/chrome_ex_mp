@@ -18,19 +18,43 @@ function detectPasswordFields(): void {
         const placeholder = (elem.placeholder || '').toLowerCase();
         return name.includes('password') || id.includes('password') || placeholder.includes('password') || placeholder.includes('密码');
       });
-  } 
+  }
 
+  // 检测用户名输入框并按匹配度排序
   usernameFields = Array.from(document.querySelectorAll('input[type="text"], input[type="email"]'))
-    .filter((input): input is HTMLInputElement => {
+    .map((input): { element: HTMLInputElement; score: number } => {
       const elem = input as HTMLInputElement;
       const name = elem.name.toLowerCase();
       const id = elem.id.toLowerCase();
       const placeholder = (elem.placeholder || '').toLowerCase();
-      return name.includes('user') || name.includes('email') || name.includes('login') ||
-             id.includes('user') || id.includes('email') || id.includes('login') ||
-             placeholder.includes('user') || placeholder.includes('email') || placeholder.includes('login') || 
-             placeholder.includes('用户名') || placeholder.includes('用户') || placeholder.includes('账号');
-    });
+      let score = 0;
+
+      // 高优先级匹配
+      if (id === 'username' || name.includes('username')) score += 100;
+      if (id.includes('email') || name.includes('email')) score += 90;
+      if (placeholder.includes('邮箱')) score += 80;
+      if (placeholder.includes('用户名')) score += 70;
+
+      // 中等优先级匹配
+      if (id.includes('user') || name.includes('user')) score += 60;
+      if (id.includes('login')|| id.includes('phone') || name.includes('login')) score += 50;
+      if (placeholder.includes('用户') || placeholder.includes('手机') ||placeholder.includes('账号') || placeholder.includes('账户')) score += 40;
+
+      // 低优先级匹配
+      if (placeholder.includes('user') || placeholder.includes('login')) score += 30;
+
+      // 排除验证码输入框
+      if (id.includes('verify') || name.includes('verify') || placeholder.includes('验证码')) score = 0;
+      // 排除工号输入框
+      if (id.includes('account_id') || placeholder.includes('工号')) score = 0;
+      // 排除ldap account输入框
+      if (id.includes('ldap')) score = 0;
+
+      return { element: elem, score };
+    })
+    .filter(item => item.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .map(item => item.element);
 
   if (passwordFields.length > 0 && isPageValid) {
     notifyBackground();
@@ -38,7 +62,7 @@ function detectPasswordFields(): void {
 }
 
 function notifyBackground(): void {
-  if (!isPageValid) return;  
+  if (!isPageValid) return;
   chrome.runtime.sendMessage({
     type: 'PASSWORD_FIELDS_DETECTED',
     payload: {
@@ -46,7 +70,7 @@ function notifyBackground(): void {
       passwordFieldsCount: passwordFields.length,
       usernameFieldsCount: usernameFields.length,
     },
-  }).catch(() => {});
+  }).catch(() => { });
 }
 
 function fillPassword(passwordEntry: PasswordEntry): void {
@@ -200,7 +224,7 @@ function showSavePrompt(username: string, password: string): void {
   `;
   saveButton.onclick = async () => {
     if (!isPageValid) return;
-    
+
     try {
       await chrome.runtime.sendMessage({
         type: 'SAVE_PASSWORD_FROM_PAGE',
